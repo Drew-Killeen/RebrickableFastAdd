@@ -44,6 +44,7 @@ export default function App() {
 function PartFields({ apiKey }: { apiKey: string }) {
   const [partNum, setPartNum] = useState("");
   const [partColor, setPartColor] = useState("");
+  const [partQuantity, setPartQuantity] = useState("");
   const [partInfo, setPartInfo] = useState<any>({});
   const [partError, setPartError] = useState("");
 
@@ -57,6 +58,10 @@ function PartFields({ apiKey }: { apiKey: string }) {
       setPartInfo({});
       setPartError("Error: Cannot find part");
     }
+  };
+
+  const handleSubmit = () => {
+    // TODO
   };
 
   return (
@@ -83,10 +88,29 @@ function PartFields({ apiKey }: { apiKey: string }) {
           }}
         />
       </span>
+      <span className="text-input-field">
+        <TextField
+          id="outlined-basic"
+          label="Quantity"
+          variant="outlined"
+          value={partQuantity}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPartQuantity(e.target.value);
+          }}
+        />
+      </span>
+      <span className="submit-button">
+        <Button variant="outlined" onClick={handleSubmit}>
+          Submit
+        </Button>
+      </span>
       {partInfo.name && (
-        <div>
-          <img src={partInfo.part_img_url} /> {partInfo.name}
-        </div>
+        <>
+          <div className="part-title">{partInfo.name}</div>
+          <div>
+            <img src={partInfo.part_img_url} />
+          </div>
+        </>
       )}
       <div>{partError}</div>
     </div>
