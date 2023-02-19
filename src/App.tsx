@@ -8,8 +8,6 @@ import Button from "@mui/material/Button";
 
 export default function App() {
   const [apiKey, setApiKey] = useState("");
-  const [partNum, setPartNum] = useState("");
-  const [partColor, setPartColor] = useState("");
 
   useEffect(() => {
     const savedApiKey = localStorage.getItem("rebrickableApiKey");
@@ -17,10 +15,6 @@ export default function App() {
       setApiKey(savedApiKey);
     }
   }, []);
-
-  const handleSubmit = async () => {
-    console.log(await getPartInfo(partNum, apiKey));
-  };
 
   const updateApiKey = (val: string) => {
     setApiKey(val);
@@ -41,8 +35,23 @@ export default function App() {
             updateApiKey(e.target.value);
           }}
         />
-        <br />
-        <br />
+        <PartFields apiKey={apiKey} />
+      </Container>
+    </>
+  );
+}
+
+function PartFields({ apiKey }: { apiKey: string }) {
+  const [partNum, setPartNum] = useState("");
+  const [partColor, setPartColor] = useState("");
+
+  const handleSubmit = async () => {
+    console.log(await getPartInfo(partNum, apiKey));
+  };
+
+  return (
+    <div className="part-field">
+      <span className="text-input-field">
         <TextField
           id="outlined-basic"
           label="Part Number"
@@ -52,6 +61,8 @@ export default function App() {
             setPartNum(e.target.value);
           }}
         />
+      </span>
+      <span className="text-input-field">
         <TextField
           id="outlined-basic"
           label="Color"
@@ -61,11 +72,11 @@ export default function App() {
             setPartColor(e.target.value);
           }}
         />
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit
-        </Button>
-      </Container>
-    </>
+      </span>
+      <Button variant="contained" onClick={handleSubmit}>
+        Submit
+      </Button>
+    </div>
   );
 }
 

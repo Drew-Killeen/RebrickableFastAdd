@@ -17,3 +17,9 @@ body {
   padding: 15px;
   border-radius: 8px;
 }
+.part-field {
+  margin-top: 25px;
+}
+.text-input-field {
+  margin-right: 25px;
+}
