@@ -44,9 +44,19 @@ export default function App() {
 function PartFields({ apiKey }: { apiKey: string }) {
   const [partNum, setPartNum] = useState("");
   const [partColor, setPartColor] = useState("");
+  const [partInfo, setPartInfo] = useState<any>({});
+  const [partError, setPartError] = useState("");
 
-  const handleSubmit = async () => {
-    console.log(await getPartInfo(partNum, apiKey));
+  const handlePartNumChange = async (value: string) => {
+    setPartNum(value);
+    let partInfoIncoming = await getPartInfo(value, apiKey);
+    if (partInfoIncoming.status == 200) {
+      setPartInfo(await partInfoIncoming.json());
+      setPartError("");
+    } else {
+      setPartInfo({});
+      setPartError("Error: Cannot find part");
+    }
   };
 
   return (
@@ -58,7 +68,7 @@ function PartFields({ apiKey }: { apiKey: string }) {
           variant="outlined"
           value={partNum}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPartNum(e.target.value);
+            handlePartNumChange(e.target.value);
           }}
         />
       </span>
@@ -73,9 +83,12 @@ function PartFields({ apiKey }: { apiKey: string }) {
           }}
         />
       </span>
-      <Button variant="contained" onClick={handleSubmit}>
-        Submit
-      </Button>
+      {partInfo.name && (
+        <div>
+          <img src={partInfo.part_img_url} /> {partInfo.name}
+        </div>
+      )}
+      <div>{partError}</div>
     </div>
   );
 }
@@ -83,7 +96,7 @@ function PartFields({ apiKey }: { apiKey: string }) {
 async function getPartInfo(partNum: string, apiKey: string) {
   const url = `https://rebrickable.com/api/v3/lego/parts/${partNum}/?key=${apiKey}`;
   let response = await fetch(url);
-  return await response.json();
+  return await response;
 }
 
 async function getPartColors(partNum: string, apiKey: string) {
