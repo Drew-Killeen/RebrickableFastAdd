@@ -34,18 +34,32 @@ export default function App() {
     <>
       <Header />
       <Container maxWidth="xl" className="main-container">
-        <TextField
-          id="outlined-basic"
-          label="API Key"
-          variant="outlined"
-          sx={{ width: "45ch" }}
-          value={apiKey}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            updateApiKey(e.target.value);
-          }}
-        />
+        <SettingsFields apiKey={apiKey} updateApiKey={updateApiKey} />
         <PartFields apiKey={apiKey} />
       </Container>
+    </>
+  );
+}
+
+function SettingsFields({
+  apiKey,
+  updateApiKey,
+}: {
+  apiKey: string;
+  updateApiKey: (val: string) => void;
+}) {
+  return (
+    <>
+      <TextField
+        id="outlined-basic"
+        label="API Key"
+        variant="outlined"
+        sx={{ width: "45ch" }}
+        value={apiKey}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          updateApiKey(e.target.value);
+        }}
+      />
     </>
   );
 }
