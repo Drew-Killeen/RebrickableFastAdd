@@ -43,10 +43,12 @@ export default function App() {
 
 function PartFields({ apiKey }: { apiKey: string }) {
   const [partNum, setPartNum] = useState("");
-  const [partColor, setPartColor] = useState("");
+  const [partColorInput, setPartColorInput] = useState("");
+  const [partColors, setPartColors] = useState<any[]>([]);
   const [partQuantity, setPartQuantity] = useState("");
   const [partInfo, setPartInfo] = useState<any>({});
   const [partError, setPartError] = useState("");
+  const [colorFieldIsDisabled, setColorFieldIsDisabled] = useState(true);
 
   const handlePartNumChange = async (value: string) => {
     setPartNum(value);
@@ -54,10 +56,18 @@ function PartFields({ apiKey }: { apiKey: string }) {
     if (partInfoIncoming.status == 200) {
       setPartInfo(await partInfoIncoming.json());
       setPartError("");
+      setColorFieldIsDisabled(false);
     } else {
       setPartInfo({});
+      setColorFieldIsDisabled(true);
+      setPartColorInput("");
       setPartError("Error: Cannot find part");
     }
+  };
+
+  const handleColorChange = async (value: string) => {
+    setPartColorInput(value);
+    setPartColors(await getPartColors(partNum, apiKey));
   };
 
   const handleSubmit = () => {
@@ -82,9 +92,10 @@ function PartFields({ apiKey }: { apiKey: string }) {
           id="outlined-basic"
           label="Color"
           variant="outlined"
-          value={partColor}
+          disabled={colorFieldIsDisabled}
+          value={partColorInput}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPartColor(e.target.value);
+            handleColorChange(e.target.value);
           }}
         />
       </span>
@@ -124,7 +135,10 @@ async function getPartInfo(partNum: string, apiKey: string) {
 }
 
 async function getPartColors(partNum: string, apiKey: string) {
-  const url = `https://rebrickable.com/api/v3/lego/parts/${partNum}/?key=${apiKey}`;
+  const url = `https://rebrickable.com/api/v3/lego/parts/${partNum}/colors/?key=${apiKey}`;
   let response = await fetch(url);
+  if (response.status !== 200) {
+    return {};
+  }
   return await response.json();
 }
