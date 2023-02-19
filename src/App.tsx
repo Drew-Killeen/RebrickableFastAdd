@@ -5,6 +5,15 @@ import Header from "./Header";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Autocomplete from "@mui/material/Autocomplete";
+import CircularProgress from "@mui/material/CircularProgress";
+
+interface Colors {
+  label: string;
+  num_sets: number;
+  num_set_parts: number;
+  part_img_url: string;
+}
 
 export default function App() {
   const [apiKey, setApiKey] = useState("");
@@ -43,12 +52,10 @@ export default function App() {
 
 function PartFields({ apiKey }: { apiKey: string }) {
   const [partNum, setPartNum] = useState("");
-  const [partColorInput, setPartColorInput] = useState("");
-  const [partColors, setPartColors] = useState<any[]>([]);
   const [partQuantity, setPartQuantity] = useState("");
   const [partInfo, setPartInfo] = useState<any>({});
   const [partError, setPartError] = useState("");
-  const [colorFieldIsDisabled, setColorFieldIsDisabled] = useState(true);
+  const [partIsFound, setPartIsFound] = useState(false);
 
   const handlePartNumChange = async (value: string) => {
     setPartNum(value);
@@ -56,18 +63,12 @@ function PartFields({ apiKey }: { apiKey: string }) {
     if (partInfoIncoming.status == 200) {
       setPartInfo(await partInfoIncoming.json());
       setPartError("");
-      setColorFieldIsDisabled(false);
+      setPartIsFound(true);
     } else {
       setPartInfo({});
-      setColorFieldIsDisabled(true);
-      setPartColorInput("");
+      setPartIsFound(false);
       setPartError("Error: Cannot find part");
     }
-  };
-
-  const handleColorChange = async (value: string) => {
-    setPartColorInput(value);
-    setPartColors(await getPartColors(partNum, apiKey));
   };
 
   const handleSubmit = () => {
@@ -87,34 +88,31 @@ function PartFields({ apiKey }: { apiKey: string }) {
           }}
         />
       </span>
-      <span className="text-input-field">
-        <TextField
-          id="outlined-basic"
-          label="Color"
-          variant="outlined"
-          disabled={colorFieldIsDisabled}
-          value={partColorInput}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            handleColorChange(e.target.value);
-          }}
-        />
-      </span>
-      <span className="text-input-field">
-        <TextField
-          id="outlined-basic"
-          label="Quantity"
-          variant="outlined"
-          value={partQuantity}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPartQuantity(e.target.value);
-          }}
-        />
-      </span>
-      <span className="submit-button">
-        <Button variant="outlined" onClick={handleSubmit}>
-          Submit
-        </Button>
-      </span>
+      {partIsFound && (
+        <>
+          <span className="text-input-field">
+            <ColorSearchField partNum={partNum} apiKey={apiKey} />
+          </span>
+
+          <span className="text-input-field">
+            <TextField
+              id="outlined-basic"
+              label="Quantity"
+              variant="outlined"
+              value={partQuantity}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setPartQuantity(e.target.value);
+              }}
+            />
+          </span>
+          <span className="submit-button">
+            <Button variant="outlined" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </span>
+        </>
+      )}
+
       {partInfo.name && (
         <>
           <div className="part-title">{partInfo.name}</div>
@@ -125,6 +123,78 @@ function PartFields({ apiKey }: { apiKey: string }) {
       )}
       <div>{partError}</div>
     </div>
+  );
+}
+
+function ColorSearchField({
+  partNum,
+  apiKey,
+}: {
+  partNum: string;
+  apiKey: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState<Colors[]>([]);
+  const loading = open && options.length === 0;
+
+  React.useEffect(() => {
+    let active = true;
+
+    if (!loading) {
+      return undefined;
+    }
+
+    (async () => {
+      if (active) {
+        let allColors: any = await getPartColors(partNum, apiKey);
+        setOptions(allColors);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [loading]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setOptions([]);
+    }
+  }, [open]);
+
+  return (
+    <Autocomplete
+      id="asynchronous-demo"
+      sx={{ width: 300 }}
+      open={open}
+      onOpen={() => {
+        setOpen(true);
+      }}
+      onClose={() => {
+        setOpen(false);
+      }}
+      // isOptionEqualToValue={(option, value) => option.title === value.title}
+      getOptionLabel={(option) => option.label}
+      options={options}
+      loading={loading}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Asynchronous"
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <React.Fragment>
+                {loading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            ),
+          }}
+        />
+      )}
+    />
   );
 }
 
@@ -140,5 +210,15 @@ async function getPartColors(partNum: string, apiKey: string) {
   if (response.status !== 200) {
     return {};
   }
-  return await response.json();
+  let partColors = await response.json();
+  let partColorsMapped: Colors[] = new Array(partColors.results.length);
+  for (let i = 0; i < partColors.results.length; i++) {
+    partColorsMapped[i] = {
+      label: partColors.results[i].color_name,
+      num_sets: partColors.results[i].num_sets,
+      num_set_parts: partColors.results[i].num_set_parts,
+      part_img_url: partColors.results[i].part_img_url,
+    };
+  }
+  return partColorsMapped;
 }
