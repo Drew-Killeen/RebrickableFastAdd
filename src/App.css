@@ -1,7 +1,19 @@
+body {
+  background-color: #e2e2e2 !important;
+  min-height: 100%;
+}
+
 .header {
   width: 100%;
-  background-color: black;
-  padding: 10px;
+  background-color: #333;
+  padding: 15px;
   color: white;
   font-size: large;
+}
+
+.main-container {
+  margin-top: 2rem;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
 }
