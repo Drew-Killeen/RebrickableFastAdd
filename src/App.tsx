@@ -23,8 +23,8 @@ export default function App() {
   const [partError, setPartError] = useState("");
   const [partIsFound, setPartIsFound] = useState(false);
   const [options, setOptions] = useState<Colors[]>([]);
-  const [value, setValue] = useState<Colors | null>(options[0]);
-  const [inputValue, setInputValue] = useState("");
+  const [selectedColor, setSelectedColor] = useState<Colors | null>(options[0]);
+  const [colorInputValue, setColorInputValue] = useState("");
 
   useEffect(() => {
     if (partIsFound) {
@@ -37,7 +37,7 @@ export default function App() {
     }
   }, [partIsFound]);
 
-  useEffect(() => console.log(value), [value]);
+  useEffect(() => console.log(selectedColor), [selectedColor]);
 
   const handlePartNumChange = async (value: string) => {
     setPartNum(value);
@@ -101,13 +101,13 @@ export default function App() {
                 <Autocomplete
                   getOptionLabel={(option) => option.label}
                   options={options}
-                  value={value}
+                  value={selectedColor}
                   onChange={(event: any, newValue: Colors | null) => {
-                    setValue(newValue);
+                    setSelectedColor(newValue);
                   }}
-                  inputValue={inputValue}
+                  inputValue={colorInputValue}
                   onInputChange={(event, newInputValue) => {
-                    setInputValue(newInputValue);
+                    setColorInputValue(newInputValue);
                   }}
                   renderInput={(params) => (
                     <TextField
