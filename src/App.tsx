@@ -35,7 +35,7 @@ export default function App() {
 
       callGetPartColors().catch(console.error);
     }
-  }, [partNum]);
+  }, [partIsFound]);
 
   useEffect(() => console.log(value), [value]);
 
