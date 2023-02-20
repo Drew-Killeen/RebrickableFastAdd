@@ -17,59 +17,25 @@ interface Colors {
 
 export default function App() {
   const [apiKey, setApiKey] = useState("");
-
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem("rebrickableApiKey");
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
-  }, []);
-
-  const updateApiKey = (val: string) => {
-    setApiKey(val);
-    localStorage.setItem("rebrickableApiKey", val);
-  };
-
-  return (
-    <>
-      <Header />
-      <Container maxWidth="xl" className="main-container">
-        <SettingsFields apiKey={apiKey} updateApiKey={updateApiKey} />
-        <PartFields apiKey={apiKey} />
-      </Container>
-    </>
-  );
-}
-
-function SettingsFields({
-  apiKey,
-  updateApiKey,
-}: {
-  apiKey: string;
-  updateApiKey: (val: string) => void;
-}) {
-  return (
-    <>
-      <TextField
-        id="outlined-basic"
-        label="API Key"
-        variant="outlined"
-        sx={{ width: "45ch" }}
-        value={apiKey}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          updateApiKey(e.target.value);
-        }}
-      />
-    </>
-  );
-}
-
-function PartFields({ apiKey }: { apiKey: string }) {
   const [partNum, setPartNum] = useState("");
   const [partQuantity, setPartQuantity] = useState("");
   const [partInfo, setPartInfo] = useState<any>({});
   const [partError, setPartError] = useState("");
   const [partIsFound, setPartIsFound] = useState(false);
+  const [options, setOptions] = useState<Colors[]>([]);
+  const [value, setValue] = useState<Colors | null>(options[0]);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    const callGetPartColors = async () => {
+      let allColors: any = await getPartColors(partNum, apiKey);
+      setOptions(allColors);
+    };
+
+    callGetPartColors().catch(console.error);
+  }, [partNum]);
+
+  useEffect(() => console.log(value), [value]);
 
   const handlePartNumChange = async (value: string) => {
     setPartNum(value);
@@ -89,103 +55,101 @@ function PartFields({ apiKey }: { apiKey: string }) {
     // TODO
   };
 
-  return (
-    <div className="part-field">
-      <span className="text-input-field">
-        <TextField
-          id="outlined-basic"
-          label="Part Number"
-          variant="outlined"
-          value={partNum}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            handlePartNumChange(e.target.value);
-          }}
-        />
-      </span>
-      {partIsFound && (
-        <>
-          <span className="text-input-field">
-            <ColorSearchField partNum={partNum} apiKey={apiKey} />
-          </span>
-
-          <span className="text-input-field">
-            <TextField
-              id="outlined-basic"
-              label="Quantity"
-              variant="outlined"
-              value={partQuantity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setPartQuantity(e.target.value);
-              }}
-            />
-          </span>
-          <span className="submit-button">
-            <Button variant="outlined" onClick={handleSubmit}>
-              Submit
-            </Button>
-          </span>
-        </>
-      )}
-
-      {partInfo.name && (
-        <>
-          <div className="part-title">{partInfo.name}</div>
-          <div>
-            <img src={partInfo.part_img_url} />
-          </div>
-        </>
-      )}
-      <div>{partError}</div>
-    </div>
-  );
-}
-
-function ColorSearchField({
-  partNum,
-  apiKey,
-}: {
-  partNum: string;
-  apiKey: string;
-}) {
-  const [options, setOptions] = useState<Colors[]>([]);
-  const [value, setValue] = useState<Colors | null>(options[0]);
-  const [inputValue, setInputValue] = useState("");
-
   useEffect(() => {
-    const callGetPartColors = async () => {
-      let allColors: any = await getPartColors(partNum, apiKey);
-      setOptions(allColors);
-    };
+    const savedApiKey = localStorage.getItem("rebrickableApiKey");
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
 
-    callGetPartColors().catch(console.error);
-  }, [partNum]);
-
-  useEffect(() => console.log(value), [value]);
+  const updateApiKey = (val: string) => {
+    setApiKey(val);
+    localStorage.setItem("rebrickableApiKey", val);
+  };
 
   return (
     <>
-      <Autocomplete
-        getOptionLabel={(option) => option.label}
-        options={options}
-        value={value}
-        onChange={(event: any, newValue: Colors | null) => {
-          setValue(newValue);
-        }}
-        inputValue={inputValue}
-        onInputChange={(event, newInputValue) => {
-          setInputValue(newInputValue);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Color"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: <>{params.InputProps.endAdornment}</>,
-            }}
-          />
-        )}
-      />
+      <Header />
+      <Container maxWidth="xl" className="main-container">
+        <TextField
+          id="outlined-basic"
+          label="API Key"
+          variant="outlined"
+          sx={{ width: "45ch" }}
+          value={apiKey}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            updateApiKey(e.target.value);
+          }}
+        />
+        <div className="part-field">
+          <span className="text-input-field">
+            <TextField
+              id="outlined-basic"
+              label="Part Number"
+              variant="outlined"
+              value={partNum}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handlePartNumChange(e.target.value);
+              }}
+            />
+          </span>
+          {partIsFound && (
+            <>
+              <span className="text-input-field">
+                <Autocomplete
+                  getOptionLabel={(option) => option.label}
+                  options={options}
+                  value={value}
+                  onChange={(event: any, newValue: Colors | null) => {
+                    setValue(newValue);
+                  }}
+                  inputValue={inputValue}
+                  onInputChange={(event, newInputValue) => {
+                    setInputValue(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Color"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: <>{params.InputProps.endAdornment}</>,
+                      }}
+                    />
+                  )}
+                />
+              </span>
+
+              <span className="text-input-field">
+                <TextField
+                  id="outlined-basic"
+                  label="Quantity"
+                  variant="outlined"
+                  value={partQuantity}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setPartQuantity(e.target.value);
+                  }}
+                />
+              </span>
+              <span className="submit-button">
+                <Button variant="outlined" onClick={handleSubmit}>
+                  Submit
+                </Button>
+              </span>
+            </>
+          )}
+
+          {partInfo.name && (
+            <>
+              <div className="part-title">{partInfo.name}</div>
+              <div>
+                <img src={partInfo.part_img_url} />
+              </div>
+            </>
+          )}
+          <div>{partError}</div>
+        </div>
+      </Container>
     </>
   );
 }
