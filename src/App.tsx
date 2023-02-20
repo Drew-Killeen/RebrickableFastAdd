@@ -160,22 +160,33 @@ function ColorSearchField({
     callGetPartColors().catch(console.error);
   }, [partNum]);
 
+  useEffect(() => console.log(value), [value]);
+
   return (
-    <Autocomplete
-      getOptionLabel={(option) => option.label}
-      options={options}
-      value={value}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Color"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: <>{params.InputProps.endAdornment}</>,
-          }}
-        />
-      )}
-    />
+    <>
+      <Autocomplete
+        getOptionLabel={(option) => option.label}
+        options={options}
+        value={value}
+        onChange={(event: any, newValue: Colors | null) => {
+          setValue(newValue);
+        }}
+        inputValue={inputValue}
+        onInputChange={(event, newInputValue) => {
+          setInputValue(newInputValue);
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Color"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: <>{params.InputProps.endAdornment}</>,
+            }}
+          />
+        )}
+      />
+    </>
   );
 }
 
