@@ -24,9 +24,7 @@ export default function App() {
   const [partError, setPartError] = useState("");
   const [partIsFound, setPartIsFound] = useState(false);
   const [colorOptions, setColorOptions] = useState<Colors[]>([]);
-  const [selectedColor, setSelectedColor] = useState<Colors | null>(
-    colorOptions[0]
-  );
+  const [selectedColor, setSelectedColor] = useState<Colors | null>(null);
   const [colorInputValue, setColorInputValue] = useState("");
 
   useEffect(() => {
