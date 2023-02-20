@@ -20,6 +20,7 @@ export default function App() {
   const [partNum, setPartNum] = useState("");
   const [partQuantity, setPartQuantity] = useState("");
   const [partInfo, setPartInfo] = useState<any>({});
+  const [partImg, setPartImg] = useState<string>("");
   const [partError, setPartError] = useState("");
   const [partIsFound, setPartIsFound] = useState(false);
   const [colorOptions, setColorOptions] = useState<Colors[]>([]);
@@ -39,13 +40,17 @@ export default function App() {
     }
   }, [partIsFound]);
 
-  useEffect(() => console.log(selectedColor), [selectedColor]);
+  useEffect(() => {
+    if (selectedColor?.part_img_url) setPartImg(selectedColor.part_img_url);
+  }, [selectedColor]);
 
   const handlePartNumChange = async (value: string) => {
     setPartNum(value);
     let partInfoIncoming = await getPartInfo(value, apiKey);
     if (partInfoIncoming.status == 200) {
-      setPartInfo(await partInfoIncoming.json());
+      let newPartInfo = await partInfoIncoming.json();
+      setPartInfo(newPartInfo);
+      setPartImg(newPartInfo.part_img_url);
       setPartError("");
       setPartIsFound(true);
     } else {
@@ -147,7 +152,7 @@ export default function App() {
             <>
               <div className="part-title">{partInfo.name}</div>
               <div>
-                <img src={partInfo.part_img_url} />
+                <img src={partImg} />
               </div>
             </>
           )}
