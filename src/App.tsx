@@ -147,64 +147,31 @@ function ColorSearchField({
   partNum: string;
   apiKey: string;
 }) {
-  const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<Colors[]>([]);
-  const loading = open && options.length === 0;
+  const [value, setValue] = useState<Colors | null>(options[0]);
+  const [inputValue, setInputValue] = useState("");
 
-  React.useEffect(() => {
-    let active = true;
-
-    if (!loading) {
-      return undefined;
-    }
-
-    (async () => {
-      if (active) {
-        let allColors: any = await getPartColors(partNum, apiKey);
-        setOptions(allColors);
-      }
-    })();
-
-    return () => {
-      active = false;
+  useEffect(() => {
+    const callGetPartColors = async () => {
+      let allColors: any = await getPartColors(partNum, apiKey);
+      setOptions(allColors);
     };
-  }, [loading]);
 
-  React.useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
+    callGetPartColors().catch(console.error);
+  }, [partNum]);
 
   return (
     <Autocomplete
-      id="asynchronous-demo"
-      sx={{ width: 300 }}
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      // isOptionEqualToValue={(option, value) => option.title === value.title}
       getOptionLabel={(option) => option.label}
       options={options}
-      loading={loading}
+      value={value}
       renderInput={(params) => (
         <TextField
           {...params}
-          label="Asynchronous"
+          label="Color"
           InputProps={{
             ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
+            endAdornment: <>{params.InputProps.endAdornment}</>,
           }}
         />
       )}
