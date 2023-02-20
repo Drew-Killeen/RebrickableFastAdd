@@ -27,12 +27,14 @@ export default function App() {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    const callGetPartColors = async () => {
-      let allColors: any = await getPartColors(partNum, apiKey);
-      setOptions(allColors);
-    };
+    if (partIsFound) {
+      const callGetPartColors = async () => {
+        let allColors: any = await getPartColors(partNum, apiKey);
+        setOptions(allColors);
+      };
 
-    callGetPartColors().catch(console.error);
+      callGetPartColors().catch(console.error);
+    }
   }, [partNum]);
 
   useEffect(() => console.log(value), [value]);
