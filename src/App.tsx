@@ -22,15 +22,17 @@ export default function App() {
   const [partInfo, setPartInfo] = useState<any>({});
   const [partError, setPartError] = useState("");
   const [partIsFound, setPartIsFound] = useState(false);
-  const [options, setOptions] = useState<Colors[]>([]);
-  const [selectedColor, setSelectedColor] = useState<Colors | null>(options[0]);
+  const [colorOptions, setColorOptions] = useState<Colors[]>([]);
+  const [selectedColor, setSelectedColor] = useState<Colors | null>(
+    colorOptions[0]
+  );
   const [colorInputValue, setColorInputValue] = useState("");
 
   useEffect(() => {
     if (partIsFound) {
       const callGetPartColors = async () => {
         let allColors: any = await getPartColors(partNum, apiKey);
-        setOptions(allColors);
+        setColorOptions(allColors);
       };
 
       callGetPartColors().catch(console.error);
@@ -100,7 +102,7 @@ export default function App() {
               <span className="text-input-field">
                 <Autocomplete
                   getOptionLabel={(option) => option.label}
-                  options={options}
+                  options={colorOptions}
                   value={selectedColor}
                   onChange={(event: any, newValue: Colors | null) => {
                     setSelectedColor(newValue);
